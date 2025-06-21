@@ -1,0 +1,66 @@
+/* src/components/Settings.css */
+.settings-container {
+  position: fixed;
+  bottom: 1rem;
+  left: 1rem;
+  z-index: 1000;
+}
+
+.settings-btn {
+  background: none;
+  border: none;
+  color: var(--clr-text);
+  opacity: 0.6;
+  cursor: pointer;
+  font-size: 2.5rem;
+  padding: 0.25rem;
+  border-radius: 50%;
+  transition: all 0.2s ease-out;
+}
+
+.settings-dropdown {
+  position: absolute;
+  top: 0;
+  left: 100%;
+
+  /* --- MODIFIED HERE --- */
+  /* 1. Remove the margin that creates the gap. */
+  /* margin-left: 1rem;  <-- DELETE THIS LINE */
+
+  /* 2. Add padding to create an invisible "bridge" for the mouse. */
+  padding: 1rem;
+  padding-left: 1.5rem; /* This extra left padding IS the mouse-safe area! */
+  /* --- END MODIFICATION --- */
+  
+  background-color: var(--clr-card-bg);
+  border: 1px solid var(--clr-border);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  width: 200px;
+
+  /* Animation properties remain the same */
+  opacity: 0;
+  transform: translateX(-10px);
+  visibility: hidden;
+  pointer-events: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.settings-container:hover .settings-dropdown {
+  opacity: 1;
+  transform: translateX(0);
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.settings-container:hover .settings-btn {
+  opacity: 1;
+  transform: rotate(45deg);
+}
+
+.settings-dropdown label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}

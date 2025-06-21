@@ -1,0 +1,86 @@
+/* src/index.css */
+
+/* Define the color palette for the "Calming Light Mode" */
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  --clr-primary: #4f8fcf;
+  --clr-primary-dark: #3a7ab8;
+  --clr-success: #22c55e;
+  --clr-danger: #ef4444;
+
+  --clr-page-bg: #fbf9f4;    /* Warm Off-white */
+  --clr-card-bg: #ffffff;   /* Pure white for contrast */
+  --clr-text: #57534e;      /* Warm Stone-Gray */
+  --clr-border: #e7e5e4;    /* Warmer Light Gray */
+  --clr-input-border: #d6d3d1;
+}
+
+/* Define the palette for the "Comforting Dark Mode" */
+body.dark-mode {
+  --clr-page-bg: #292524;    /* Warm Dark Gray */
+  --clr-card-bg: #44403c;    /* Lighter Warm Dark */
+  --clr-text: #d6d3d1;      /* Warm Off-white text */
+  --clr-border: #57534e;    /* Warm Medium-Gray */
+  --clr-input-border: #57534e;
+}
+
+body {
+  margin: 0;
+  background: var(--clr-page-bg);
+  color: var(--clr-text);
+  padding: 2rem;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+#root {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* --- NEW: Main App Layout --- */
+.app-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr; /* Fixed width for nav */
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+/* This was the old .layout, now renamed */
+.content-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+/* Responsive tweaks */
+@media(max-width: 1100px) {
+  .content-layout {
+    grid-template-columns: 1fr;
+  }
+}
+@media(max-width: 900px) {
+  .app-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.logout-btn {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--clr-text);
+  cursor: pointer;
+  border-radius: 6px;
+  transition: color 0.2s, background-color 0.2s;
+}
+
+.logout-btn:hover {
+  color: var(--clr-primary);
+  background-color: var(--clr-border);
+}

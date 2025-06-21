@@ -1,0 +1,49 @@
+/* src/components/Navbar.css */
+.vertical-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.vertical-nav a {
+  background: var(--clr-card-bg);
+  color: #374151;
+  text-align: left;
+  border: 1px solid var(--clr-border);
+  font-weight: 500;
+  padding: 1rem;
+  border-radius: 8px; /* --radius */
+  text-decoration: none;
+  transition: all 0.2s ease-in-out;
+}
+
+body.dark-mode .vertical-nav a {
+    background: var(--clr-card-bg);
+    color: var(--clr-text);
+}
+
+.vertical-nav a:hover {
+  background: var(--clr-border);
+  border-color: #d6d3d1;
+  color: #1c1917;
+}
+
+body.dark-mode .vertical-nav a:hover {
+    background: #5e5954;
+    border-color: #78716c;
+    color: #fff;
+}
+
+
+.vertical-nav a.active {
+  background: var(--clr-primary);
+  color: #fff;
+  border-color: var(--clr-primary);
+  font-weight: 600;
+  box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px -1px rgba(0,0,0,0.1);
+}
+
+.vertical-nav a.active:hover {
+    background: var(--clr-primary-dark);
+}

@@ -1,0 +1,57 @@
+/* src/components/AdminPanel.css */
+.settings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.zip-list-container {
+    background-color: var(--clr-card-bg);
+    border: 1px solid var(--clr-border);
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.zip-list-container h4 {
+    margin-top: 0;
+    border-bottom: 1px solid var(--clr-border);
+    padding-bottom: 0.5rem;
+}
+
+.zip-input-group {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.zip-input-group input {
+    flex-grow: 1;
+}
+
+.zip-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0;
+    list-style: none;
+}
+
+.zip-item {
+    background-color: var(--clr-page-bg);
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.zip-item button {
+    background: none;
+    border: none;
+    color: var(--clr-primary);
+    cursor: pointer;
+    font-weight: bold;
+    padding: 0;
+    line-height: 1;
+}
