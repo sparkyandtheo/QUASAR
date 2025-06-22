@@ -1,5 +1,5 @@
 // src/context/AuthContext.jsx
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext, useMemo } from 'react';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
@@ -40,16 +40,15 @@ export function AuthProvider({ children }) {
     return unsubscribe;
   }, []);
 
-  // --- MODIFIED: Added `loading` to the value object ---
-  const value = {
+  // --- MODIFIED: `useMemo` prevents unnecessary re-renders of consumers ---
+  const value = useMemo(() => ({
     currentUser,
     userRole,
-    loading, // <-- Pass the loading state to consumers
+    loading,
     logout,
-  };
+  }), [currentUser, userRole, loading]);
 
   return (
-    // --- MODIFIED: Let child components decide what to do while loading ---
     <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>

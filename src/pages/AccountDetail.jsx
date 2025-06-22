@@ -6,7 +6,7 @@ import { db } from '../firebaseConfig';
 import '../components/AccountList.css'; // Reuse styles
 
 const usStates = ['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY'];
-const defaultPhone = { type: 'Mobile', number: '', smsOk: false, numberStatus: 'pristine' };
+const defaultPhone = { type: 'Mobile', number: '', smsOk: false, numberStatus: 'pristine', isArchived: false };
 const defaultContact = { name: '', email: '', emailStatus: 'pristine', isJobContact: false, isArchived: false, phones: [{ ...defaultPhone }] };
 
 
@@ -24,7 +24,6 @@ function AccountDetail() {
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [activeContactIndex, setActiveContactIndex] = useState(0);
-
   const [showAddressHistory, setShowAddressHistory] = useState(false);
 
   const [standardZips, setStandardZips] = useState([]);
@@ -131,6 +130,11 @@ function AccountDetail() {
     newContacts[contactIndex].phones.push({ ...defaultPhone });
     setFormData(prev => ({...prev, contacts: newContacts}));
   };
+  const archivePhoneNumber = (contactIndex, phoneIndex) => {
+    const newContacts = [...formData.contacts];
+    newContacts[contactIndex].phones[phoneIndex].isArchived = true;
+    setFormData(prev => ({...prev, contacts: newContacts}));
+  };
   const archiveContact = (indexToArchive) => {
     const newContacts = [...formData.contacts];
     newContacts[indexToArchive].isArchived = true;
@@ -140,9 +144,7 @@ function AccountDetail() {
             newContacts[firstActiveIndex].isJobContact = true;
         } else {
              const anyOtherContact = newContacts.find(c => c.isArchived === false);
-             if(!anyOtherContact) {
-                 // No active contacts left
-             }
+             if(!anyOtherContact) {}
         }
     }
     setFormData(prev => ({...prev, contacts: newContacts}));
@@ -191,7 +193,6 @@ function AccountDetail() {
     });
     setIsEditing(false);
   };
-
   const handleRestoreAddress = async (addressToRestore) => {
     const docRef = doc(db, 'accounts', accountId);
     const currentAddressToArchive = { ...account.billingAddress, archivedAt: new Date() };
@@ -216,6 +217,7 @@ function AccountDetail() {
 
   const visibleContacts = isEditing ? formData.contacts.map((c, i) => ({...c, originalIndex: i})).filter(c => !c.isArchived) : account.contacts.map((c, i) => ({...c, originalIndex: i})).filter(c => !c.isArchived);
   const activeContact = formData.contacts[activeContactIndex] || {};
+  const visiblePhones = activeContact.phones?.filter(p => !p.isArchived) || [];
 
   return (
     <>
@@ -303,12 +305,17 @@ function AccountDetail() {
                   <div className="form-group grid-col-span-3"><label>Contact Name</label><input type="text" value={activeContact.name || ''} onChange={(e) => handleContactChange(activeContactIndex, 'name', capitalizeWords(e.target.value))} /></div>
                   <div className="form-group grid-col-span-3"><label>Email</label><input type="email" value={activeContact.email || ''} onChange={(e) => handleContactChange(activeContactIndex, 'email', e.target.value)} className={activeContact.emailStatus}/></div>
                   <div className="form-group grid-col-span-6"><label>Phone Numbers</label>
-                      {activeContact.phones?.map((phone, pIndex) => (
-                          <div key={pIndex} className="phone-entry"><input type="text" list="phone-types" value={phone.type} onChange={(e) => handlePhoneChange(activeContactIndex, pIndex, 'type', e.target.value)} style={{flexBasis: '120px'}} />
-                              <div className="form-group" style={{flexGrow: 1, margin: 0}}><input type="tel" value={phone.number} onChange={(e) => handlePhoneChange(activeContactIndex, pIndex, 'number', e.target.value)} className={phone.numberStatus} /></div>
-                              <div className="checkbox-group" style={{paddingTop: 0}}><input type="checkbox" checked={phone.smsOk} onChange={(e) => handlePhoneChange(activeContactIndex, pIndex, 'smsOk', e.target.checked)} /><label>SMS OK?</label></div>
+                      {visiblePhones.map((phone, visibleIndex) => {
+                         const originalIndex = activeContact.phones.findIndex(p => p === phone);
+                         return (
+                          <div key={originalIndex} className="phone-entry">
+                              <input type="text" list="phone-types" value={phone.type} onChange={(e) => handlePhoneChange(activeContactIndex, originalIndex, 'type', e.target.value)} style={{flexBasis: '120px'}} />
+                              <div className="form-group" style={{flexGrow: 1, margin: 0}}><input type="tel" value={phone.number} onChange={(e) => handlePhoneChange(activeContactIndex, originalIndex, 'number', e.target.value)} className={phone.numberStatus} /></div>
+                              <div className="checkbox-group" style={{paddingTop: 0}}><input type="checkbox" checked={phone.smsOk} onChange={(e) => handlePhoneChange(activeContactIndex, originalIndex, 'smsOk', e.target.checked)} /><label>SMS OK?</label></div>
+                              {visiblePhones.length > 1 && <button type="button" className="delete-phone-btn" title="Archive Phone" onClick={() => archivePhoneNumber(activeContactIndex, originalIndex)}>×</button>}
                           </div>
-                      ))}
+                         )
+                      })}
                       <datalist id="phone-types"><option value="Mobile"/><option value="Work Mobile"/><option value="Work Office"/><option value="Home"/><option value="Spouse"/><option value="Fax"/></datalist>
                       <button className="add-phone-btn icon-btn" onClick={() => addPhoneNumber(activeContactIndex)}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
@@ -326,7 +333,7 @@ function AccountDetail() {
                     <div className="contact-card-header"><strong>{contact.name}</strong>{contact.isJobContact && <span className="job-contact-tag">Default</span>}</div>
                     <div className="info-group"><label>Email</label><div className="value">{contact.email || 'N/A'}</div></div>
                     <div className="info-group"><label>Phone</label>
-                        {contact.phones?.map((phone, pIndex) => (<div key={pIndex} className="value">{phone.type}: {phone.number} {phone.smsOk && '(SMS OK)'}</div>))}
+                        {contact.phones?.filter(p => !p.isArchived).map((phone, pIndex) => (<div key={pIndex} className="value">{phone.type}: {phone.number} {phone.smsOk && '(SMS OK)'}</div>))}
                     </div>
                 </div>
             ))
