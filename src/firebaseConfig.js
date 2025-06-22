@@ -1,24 +1,18 @@
 // src/firebaseConfig.js
-
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore"; // <-- This line was likely missing
+import { getFirestore } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
 
-// Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyAPOPlL3RGrsptIP5pXkK508XV8ZXMbOWM",
-  authDomain: "planar-alliance-448817-h0.firebaseapp.com",
-  projectId: "planar-alliance-448817-h0",
-  storageBucket: "planar-alliance-448817-h0.firebasestorage.app",
-  messagingSenderId: "1049899901887",
-  appId: "1:1049899901887:web:dfee63f34773941aafb70a",
-  measurementId: "G-WX52CNVL14"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
-
-// Initialize and export Firestore so we can use it elsewhere
-export const db = getFirestore(app); // <-- And this "export" line was likely missing
+export const db = getFirestore(app);
