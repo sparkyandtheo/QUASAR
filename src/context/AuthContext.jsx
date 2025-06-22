@@ -1,6 +1,5 @@
 // src/context/AuthContext.jsx
 import React, { createContext, useState, useEffect, useContext } from 'react';
-// --- Add signOut to this import ---
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
@@ -16,7 +15,6 @@ export function AuthProvider({ children }) {
   const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // --- NEW: Function to log the user out ---
   function logout() {
     const auth = getAuth();
     return signOut(auth);
@@ -42,15 +40,18 @@ export function AuthProvider({ children }) {
     return unsubscribe;
   }, []);
 
+  // --- MODIFIED: Added `loading` to the value object ---
   const value = {
     currentUser,
     userRole,
-    logout, // <-- Expose the logout function to the app
+    loading, // <-- Pass the loading state to consumers
+    logout,
   };
 
   return (
+    // --- MODIFIED: Let child components decide what to do while loading ---
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 }

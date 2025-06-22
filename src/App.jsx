@@ -10,6 +10,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Settings from './components/Settings';
 import Toolbox from './components/Toolbox';
+import AccountDetail from './pages/AccountDetail'; // <-- ADDED: Import the new page component
 
 // This component is the main layout for authenticated users
 function MainAppLayout() {
@@ -46,6 +47,8 @@ function MainAppLayout() {
                         <div className="main-content">
                             <Routes>
                                 <Route path="/" element={<AccountList />} />
+                                {/* --- ADDED: The new route for viewing a single account --- */}
+                                <Route path="/account/:accountId" element={<AccountDetail />} />
                                 <Route path="/admin" element={
                                     <ProtectedRoute>
                                         <AdminPanel />

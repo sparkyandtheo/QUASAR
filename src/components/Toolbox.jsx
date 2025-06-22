@@ -1,5 +1,6 @@
 // src/components/Toolbox.jsx
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom'; // <-- ADDED: Import Link
 import { collection, query, onSnapshot, orderBy, where } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import './Toolbox.css';
@@ -29,31 +30,31 @@ function Toolbox() {
   const filteredAccounts = allAccounts.filter(account => {
     const term = searchTerm.toLowerCase();
     
-    // --- THIS IS THE CORRECTED LOGIC ---
     const searchableContent = [
       account.accountNumber,
       account.billingAddress?.street1,
       account.billingAddress?.city,
       account.billingAddress?.zip,
-      // Use `?? []` to provide a fallback empty array if contacts or phones are missing on an old record
       ...(account.contacts ?? []).flatMap(c => [
         c.name,
         c.email,
         ...(c.phones ?? []).map(p => p.number)
       ])
     ].join(' ').toLowerCase();
-    // --- END CORRECTION ---
 
     return searchableContent.includes(term);
   });
   
+  // --- MODIFIED: The whole card is now a link ---
   const renderCard = (account) => (
-    <div key={account.id} className="card">
-        <strong>{account.accountNumber}</strong><br />
-        <small>{account.contacts?.[0]?.name}</small>
-        <p className="card-request">{account.billingAddress?.street1}</p>
-        <small>Created: {new Date(account.createdAt?.toDate()).toLocaleDateString()}</small>
-    </div>
+    <Link to={`/account/${account.id}`} key={account.id} className="card-link">
+      <div className="card">
+          <strong>{account.accountNumber}</strong><br />
+          <small>{account.contacts?.[0]?.name}</small>
+          <p className="card-request">{account.billingAddress?.street1}</p>
+          <small>Created: {new Date(account.createdAt?.toDate()).toLocaleDateString()}</small>
+      </div>
+    </Link>
   );
 
   return (
