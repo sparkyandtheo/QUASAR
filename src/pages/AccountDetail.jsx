@@ -1,41 +1,78 @@
 // src/pages/AccountDetail.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc } from 'firebase/firestore'; // Removed serverTimestamp
 import { db } from '../firebaseConfig';
-import '../components/AccountList.css'; // Reuse styles for consistency
+import '../components/AccountList.css'; // Reuse styles
+
+const usStates = ['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY'];
 
 function AccountDetail() {
   const { accountId } = useParams();
   const [account, setAccount] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Function to fetch a single account from Firestore
-    const fetchAccount = async () => {
-      setLoading(true);
-      try {
-        const docRef = doc(db, 'accounts', accountId);
-        const docSnap = await getDoc(docRef);
+  const [isEditing, setIsEditing] = useState(false);
+  const [billingAddress, setBillingAddress] = useState({ street1: '', street2: '', city: '', state: 'NY', zip: '' });
+  
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
-        if (docSnap.exists()) {
-          setAccount({ id: docSnap.id, ...docSnap.data() });
-        } else {
-          console.log("No such document!");
-          setAccount(null); // Or handle as a "not found" state
-        }
-      } catch (error) {
-        console.error("Error fetching account:", error);
+  useEffect(() => {
+    const docRef = doc(db, 'accounts', accountId);
+    const unsubscribe = onSnapshot(docRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = { id: docSnap.id, ...docSnap.data() };
+        setAccount(data);
+        setBillingAddress(data.billingAddress);
+      } else {
+        setAccount(null);
       }
       setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [accountId]);
+
+  const handleAddressChange = (field, value) => {
+    setBillingAddress(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleSaveChanges = async () => {
+    if (JSON.stringify(account.billingAddress) === JSON.stringify(billingAddress)) {
+      setIsEditing(false);
+      return;
+    }
+
+    const docRef = doc(db, 'accounts', accountId);
+    
+    // --- MODIFIED: Replaced serverTimestamp() with new Date() ---
+    // This creates the timestamp on the client side, avoiding the Firestore limitation.
+    const addressToArchive = {
+      ...account.billingAddress,
+      archivedAt: new Date() 
     };
 
-    if (accountId) {
-      fetchAccount();
-    }
-  }, [accountId]); // This effect runs whenever the accountId in the URL changes
+    const newHistory = [addressToArchive, ...(account.addressHistory || [])];
 
-  // --- Display Loading or Not Found State ---
+    try {
+      await updateDoc(docRef, {
+        billingAddress: billingAddress,
+        addressHistory: newHistory
+      });
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Error updating address:", error);
+      setErrorMessage('Failed to save changes. Please check your connection and try again.');
+      setShowErrorModal(true);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setBillingAddress(account.billingAddress);
+    setIsEditing(false);
+  };
+
   if (loading) {
     return <div className="account-form-container"><p>Loading account details...</p></div>;
   }
@@ -44,103 +81,100 @@ function AccountDetail() {
     return <div className="account-form-container"><p>Account not found.</p></div>;
   }
 
-  // Find the primary contact for easy display
-  const primaryContact = account.contacts?.find(c => c.isJobContact) || account.contacts?.[0];
-
   return (
-    <div className="account-form-container">
-      <fieldset>
-        <legend>Account Details</legend>
-        
-        {/* --- Display Header Info --- */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-          <div>
-            <h3 style={{ margin: 0 }}>{account.accountNumber}</h3>
-            <p style={{ margin: 0 }}>Customer since {new Date(account.createdAt?.toDate()).toLocaleDateString()}</p>
+    <>
+      <div className="account-form-container">
+        <fieldset>
+          <legend>Account Details</legend>
+          
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <div>
+              <h3 style={{ margin: 0 }}>{account.accountNumber}</h3>
+              <p style={{ margin: 0 }}>Customer since {new Date(account.createdAt?.toDate()).toLocaleDateString()}</p>
+            </div>
+            {/* --- MODIFIED: Added className to the button --- */}
+            {!isEditing && <button className="edit-btn" onClick={() => setIsEditing(true)}>Edit Account</button>}
           </div>
-          <button>Edit Account</button> {/* This is our next step! */}
-        </div>
-        
-        <hr style={{margin: '1.5rem 0'}}/>
-        
-        {/* --- Display Billing Address --- */}
-        <div className="form-grid">
+          
+          <hr style={{margin: '1.5rem 0'}}/>
+          
+          <div className="form-grid">
             <div className="form-group grid-col-span-3">
-                <label>Billing Address</label>
+              <label>Billing Address</label>
+              {isEditing ? (
+                <>
+                  <input type="text" value={billingAddress.street1} onChange={(e) => handleAddressChange('street1', e.target.value)} placeholder="Street 1" />
+                  <input type="text" value={billingAddress.street2} onChange={(e) => handleAddressChange('street2', e.target.value)} placeholder="Street 2 (Optional)" style={{marginTop: '0.5rem'}}/>
+                  <div style={{display: 'flex', gap: '0.5rem', marginTop: '0.5rem'}}>
+                      <input type="text" value={billingAddress.city} onChange={(e) => handleAddressChange('city', e.target.value)} placeholder="City"/>
+                      <select value={billingAddress.state} onChange={(e) => handleAddressChange('state', e.target.value)} style={{flex: '0 0 80px'}}>{usStates.map(s => <option key={s} value={s}>{s}</option>)}</select>
+                      <input type="text" value={billingAddress.zip} onChange={(e) => handleAddressChange('zip', e.target.value)} placeholder="Zip"/>
+                  </div>
+                </>
+              ) : (
                 <div className="read-only-field">
-                    {account.billingAddress.street1}<br/>
-                    {account.billingAddress.street2 && <>{account.billingAddress.street2}<br/></>}
-                    {account.billingAddress.city}, {account.billingAddress.state} {account.billingAddress.zip}
+                  {account.billingAddress.street1}<br/>
+                  {account.billingAddress.street2 && <>{account.billingAddress.street2}<br/></>}
+                  {account.billingAddress.city}, {account.billingAddress.state} {account.billingAddress.zip}
                 </div>
+              )}
             </div>
-             <div className="form-group grid-col-span-3">
-                <label>Jobsite Address</label>
-                <div className="read-only-field">
-                    {account.isJobsiteSameAsBilling ? 'Same as Billing' : 'Different Address (Display Logic TBD)'}
+            <div className="form-group grid-col-span-3">
+              <label>Jobsite Address</label>
+              <div className="read-only-field">
+                  {account.isJobsiteSameAsBilling ? 'Same as Billing' : 'Different Address (Display Logic TBD)'}
+              </div>
+            </div>
+            {isEditing && (
+                <div className="form-actions grid-col-span-6" style={{marginTop: 0, justifyContent: 'flex-start', gap: '1rem'}}>
+                    <button onClick={handleSaveChanges}>Save Changes</button>
+                    <button onClick={handleCancelEdit} className="secondary-btn">Cancel</button>
+                </div>
+            )}
+          </div>
+
+          <h4 style={{marginTop: '2rem'}}>Contacts</h4>
+          {account.contacts?.map((contact, index) => !contact.isArchived && (
+              <div key={index} className="contact-card">
+                 {/* Contact details */}
+              </div>
+          ))}
+
+          {account.addressHistory && account.addressHistory.length > 0 && (
+            <div className="history-section">
+              <h4>Address History</h4>
+              {account.addressHistory.map((addr, index) => (
+                <div key={index} className="history-item">
+                  <div className="history-item-address">
+                    {addr.street1}, {addr.city}, {addr.state} {addr.zip}
+                  </div>
+                  <div className="history-item-date">
+                    {/* --- MODIFIED: Handles both Firestore Timestamps and JS Dates --- */}
+                    Archived on {new Date(addr.archivedAt?.toDate ? addr.archivedAt.toDate() : addr.archivedAt).toLocaleDateString()}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </fieldset>
+      </div>
+
+      {showErrorModal && (
+        <div className="modal-overlay">
+            <div className="modal-content error-modal">
+                <div className="modal-header">
+                    <h4>Save Failed</h4>
+                    <button className="close-btn" onClick={() => setShowErrorModal(false)}>×</button>
+                </div>
+                <p>{errorMessage}</p>
+                <div className="form-actions" style={{justifyContent: 'flex-end'}}>
+                    <button onClick={() => setShowErrorModal(false)}>OK</button>
                 </div>
             </div>
         </div>
-
-        {/* --- Display Contacts --- */}
-        <h4 style={{marginTop: '2rem'}}>Contacts</h4>
-        {account.contacts?.map((contact, index) => !contact.isArchived && (
-            <div key={index} className="contact-card">
-                <div className="contact-card-header">
-                    <strong>{contact.name}</strong>
-                    {contact.isJobContact && <span className="job-contact-tag">Primary</span>}
-                </div>
-                <p><strong>Email:</strong> {contact.email || 'N/A'}</p>
-                <p><strong>Phone:</strong></p>
-                <ul>
-                    {contact.phones?.map((phone, pIndex) => (
-                        <li key={pIndex}>{phone.type}: {phone.number} {phone.smsOk && '(SMS OK)'}</li>
-                    ))}
-                </ul>
-            </div>
-        ))}
-      </fieldset>
-    </div>
+      )}
+    </>
   );
 }
 
-// Add a new helper CSS file for this component if needed, or add styles to an existing one.
-// For now, let's create a placeholder style for the read-only fields and cards.
-// You can add these styles to `src/components/AccountList.css` to keep it simple.
-const placeholder = `
-/* Add these styles to the end of src/components/AccountList.css */
-
-.read-only-field {
-  background-color: var(--clr-page-bg);
-  padding: .65rem;
-  border-radius: 6px;
-  min-height: 41.5px;
-  box-sizing: border-box;
-}
-
-.contact-card {
-  border: 1px solid var(--clr-border);
-  border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-}
-
-.contact-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-
-.job-contact-tag {
-  background-color: var(--clr-primary);
-  color: white;
-  padding: 0.2rem 0.6rem;
-  border-radius: 1rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-`;
-
-
 export default AccountDetail;
-

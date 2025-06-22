@@ -31,8 +31,12 @@ body {
   margin: 0;
   background: var(--clr-page-bg);
   color: var(--clr-text);
-  padding: 2rem;
+  /* --- MODIFIED: Reduced vertical padding to save space --- */
+  padding: 1.5rem 2rem;
   transition: background-color 0.3s, color 0.3s;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 #root {
@@ -40,21 +44,64 @@ body {
   margin: 0 auto;
 }
 
-/* --- NEW: Main App Layout --- */
+/* --- ADDED: New styles for the main app header --- */
+.app-header {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--clr-border);
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 2.25rem; /* Using rem to scale with font settings */
+  line-height: 1.1;
+}
+
+/* --- MODIFIED: Logout button is now positioned within the new header --- */
+.logout-btn {
+  background: none;
+  border: none;
+  padding: 0.25rem 0; /* Adjusted padding */
+  margin-top: 0.5rem;
+  font-size: 0.9rem; /* Using rem */
+  font-weight: 600;
+  color: var(--clr-text);
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+.logout-btn:hover {
+  opacity: 1;
+  color: var(--clr-primary);
+}
+
+
+/* Main layout styles remain the same */
 .app-layout {
   display: grid;
-  grid-template-columns: 220px 1fr; /* Fixed width for nav */
+  grid-template-columns: 220px 1fr;
   gap: 1.5rem;
   align-items: flex-start;
 }
 
-/* This was the old .layout, now renamed */
 .content-layout {
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 1.5rem;
   align-items: flex-start;
 }
+
+.main-content {
+  position: relative;
+  z-index: 2;
+}
+
+.sidebar-content {
+  position: relative;
+  z-index: 1;
+}
+
 
 /* Responsive tweaks */
 @media(max-width: 1100px) {
@@ -66,21 +113,4 @@ body {
   .app-layout {
     grid-template-columns: 1fr;
   }
-}
-
-.logout-btn {
-  background: none;
-  border: none;
-  padding: 0.5rem;
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--clr-text);
-  cursor: pointer;
-  border-radius: 6px;
-  transition: color 0.2s, background-color 0.2s;
-}
-
-.logout-btn:hover {
-  color: var(--clr-primary);
-  background-color: var(--clr-border);
 }

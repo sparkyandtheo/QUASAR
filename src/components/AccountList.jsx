@@ -5,7 +5,7 @@ import { db } from '../firebaseConfig';
 import './AccountList.css';
 
 const usStates = ['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY'];
-const defaultPhone = { type: 'Cell', number: '', smsOk: false };
+const defaultPhone = { type: 'Mobile', number: '', smsOk: false };
 const defaultContact = { name: '', email: '', isJobContact: false, isArchived: false, phones: [{ ...defaultPhone }] };
 
 function AccountList() {
@@ -14,6 +14,7 @@ function AccountList() {
   const [customerSource, setCustomerSource] = useState('');
   const [customerSourcesList, setCustomerSourcesList] = useState([]);
   const [showArchiveModal, setShowArchiveModal] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
 
   const [street1, setStreet1] = useState('');
   const [street2, setStreet2] = useState('');
@@ -22,6 +23,13 @@ function AccountList() {
   const [zip, setZip] = useState('');
   const [showStreet2, setShowStreet2] = useState(false);
   const [isJobsiteSameAsBilling, setIsJobsiteSameAsBilling] = useState(false);
+
+  useEffect(() => {
+    const helpDismissed = localStorage.getItem('quasarHelpDismissed');
+    if (!helpDismissed) {
+      setShowHelp(true);
+    }
+  }, []);
 
   useEffect(() => {
       const fetchSources = async () => {
@@ -38,6 +46,11 @@ function AccountList() {
       fetchSources();
   }, []);
 
+  const dismissHelp = () => {
+    setShowHelp(false);
+    localStorage.setItem('quasarHelpDismissed', 'true');
+  };
+
   const capitalizeWords = (str) => str ? str.replace(/\b\w/g, (char) => char.toUpperCase()) : '';
   const formatPhoneNumber = (value) => {
     if (!value) return value;
@@ -52,10 +65,15 @@ function AccountList() {
     newContacts[index][field] = value;
     setContacts(newContacts);
   };
+
   const handleJobContactToggle = (toggledIndex) => {
-    const newContacts = contacts.map((contact, index) => ({ ...contact, isJobContact: index === toggledIndex }));
+    const newContacts = contacts.map((contact, index) => ({
+      ...contact,
+      isJobContact: index === toggledIndex
+    }));
     setContacts(newContacts);
   };
+
   const handlePhoneChange = (contactIndex, phoneIndex, field, event) => {
     const newContacts = [...contacts];
     const phone = newContacts[contactIndex].phones[phoneIndex];
@@ -77,6 +95,12 @@ function AccountList() {
   const archiveContact = (indexToArchive) => {
     const newContacts = [...contacts];
     newContacts[indexToArchive].isArchived = true;
+    if (newContacts[indexToArchive].isJobContact) {
+        const firstActiveIndex = newContacts.findIndex(c => !c.isArchived);
+        if (firstActiveIndex !== -1) {
+            newContacts[firstActiveIndex].isJobContact = true;
+        }
+    }
     setContacts(newContacts);
     const firstActiveIndex = newContacts.findIndex(c => !c.isArchived);
     setActiveContactIndex(Math.max(0, firstActiveIndex));
@@ -121,6 +145,18 @@ function AccountList() {
   return (
     <>
       <div className="account-form-container">
+        {showHelp && (
+          <div className="help-box">
+            <button className="help-box-dismiss" onClick={dismissHelp}>×</button>
+            <h4>Quick Tips</h4>
+            <ol>
+              <li>Enter details for the first contact.</li>
+              <li>Use the <strong>+</strong> button to add more contacts if needed.</li>
+              <li>Set the account's <strong>Billing Address</strong>.</li>
+              <li>Use the checkbox on each tab to set the <strong>Default Job Contact</strong>.</li>
+            </ol>
+          </div>
+        )}
         <fieldset>
           <legend>Create New Account</legend>
           <div className="form-group" style={{marginBottom: '1.5rem'}}>
@@ -136,8 +172,10 @@ function AccountList() {
                 key={contact.originalIndex} 
                 className={`tab-button ${contact.originalIndex === activeContactIndex ? 'active' : ''} ${contact.isJobContact ? 'is-job-contact' : ''}`} 
                 onClick={() => setActiveContactIndex(contact.originalIndex)}
+                title={contact.isJobContact ? "Default Job Contact" : "View Contact"}
               >
                 {contact.name || `Contact ${contact.originalIndex + 1}`}
+                {contact.isJobContact && <span className="primary-tag">(Default)</span>}
                 {visibleContacts.length > 1 && (<span className="delete-tab-btn" title={`Archive Contact`} onClick={(e) => {e.stopPropagation(); archiveContact(contact.originalIndex);}}>×</span>)}
               </button>
             ))}
@@ -151,12 +189,25 @@ function AccountList() {
           <div className="form-grid">
               <div className="form-group grid-col-span-3"><label htmlFor="contactName">Contact Name</label><input id="contactName" type="text" value={activeContact.name || ''} onChange={(e) => handleContactChange(activeContactIndex, 'name', capitalizeWords(e.target.value))} /></div>
               <div className="form-group grid-col-span-3"><label htmlFor="contactEmail">Email</label><input id="contactEmail" type="email" value={activeContact.email || ''} onChange={(e) => handleContactChange(activeContactIndex, 'email', e.target.value)} /></div>
-              <div className="form-group grid-col-span-6"><div className="checkbox-group" style={{paddingTop: 0, justifyContent: 'flex-end'}}><input id="isJobContact" type="checkbox" checked={activeContact.isJobContact} onChange={() => handleJobContactToggle(activeContactIndex)} /><label htmlFor="isJobContact">This is the primary contact for jobs</label></div></div>
               <div className="form-group grid-col-span-6">
                    <label>Phone Numbers <button className="add-street-btn" title="Add phone number" onClick={() => addPhoneNumber(activeContactIndex)}>+</button></label>
                    {activeContact.phones?.map((phone, index) => (<div key={index} className="phone-entry"><input list="phone-types" placeholder="Type" value={phone.type} onChange={(e) => handlePhoneChange(activeContactIndex, index, 'type', e)} style={{flexBasis: '120px', flexGrow: 0}}/><div className="form-group" style={{flexBasis: '180px', flexGrow: 0}}><input type="tel" placeholder="(XXX) XXX-XXXX" value={phone.number} onChange={(e) => handlePhoneChange(activeContactIndex, index, 'number', e)} /></div><div className="checkbox-group" style={{paddingTop: 0}}><input id={`smsOk-${index}`} type="checkbox" checked={phone.smsOk} onChange={(e) => handlePhoneChange(activeContactIndex, index, 'smsOk', e)} /><label htmlFor={`smsOk-${index}`}>SMS OK?</label></div></div>))}
               </div>
-              <datalist id="phone-types"><option value="Cell" /><option value="Work" /><option value="Home" /><option value="Spouse" /><option value="Fax" /></datalist>
+              <datalist id="phone-types">
+                  <option value="Mobile" />
+                  <option value="Work Mobile" />
+                  <option value="Work Office" />
+                  <option value="Home" />
+                  <option value="Spouse" />
+                  <option value="Fax" />
+              </datalist>
+              {/* --- MOVED: Default Job Contact checkbox is now here --- */}
+              <div className="form-group grid-col-span-6">
+                <div className="checkbox-group" style={{paddingTop: '0.5rem', justifyContent: 'flex-start'}}>
+                    <input id="isJobContact" type="checkbox" checked={activeContact.isJobContact} onChange={() => handleJobContactToggle(activeContactIndex)} />
+                    <label htmlFor="isJobContact">Default Job Contact</label>
+                </div>
+              </div>
           </div>
           <hr style={{margin: '1.5rem 0'}}/>
           <div className="form-grid">
@@ -166,8 +217,9 @@ function AccountList() {
               <div className="form-group grid-col-span-1"><label htmlFor="state">State</label><select id="state" value={state} onChange={(e) => setState(e.target.value)}>{usStates.map(s => <option key={s} value={s}>{s}</option>)}</select></div>
               <div className="form-group grid-col-span-2"><label htmlFor="zip">Zip Code</label><input id="zip" type="text" value={zip} onChange={(e) => setZip(e.target.value)} /></div>
               <div className="form-group grid-col-span-6"><div className="checkbox-group" style={{paddingTop: '0.5rem'}}><input id="jobsiteSame" type="checkbox" checked={isJobsiteSameAsBilling} onChange={(e) => setIsJobsiteSameAsBilling(e.target.checked)} /><label htmlFor="jobsiteSame">Jobsite address is the same as billing</label></div></div>
-              <div className="form-actions grid-col-span-6"><button type="button" onClick={handleCreateAccount}>Create Account</button></div>
           </div>
+          
+          <div className="form-actions grid-col-span-6"><button type="button" onClick={handleCreateAccount}>Create Account</button></div>
         </fieldset>
       </div>
       {showArchiveModal && (<div className="modal-overlay"><div className="modal-content"><div className="modal-header"><h4>Archived Contacts</h4><button className="close-btn" onClick={() => setShowArchiveModal(false)}>×</button></div><div className="archived-list">{archivedContacts.length > 0 ? (archivedContacts.map((contact) => (<div key={contact.originalIndex} className="archived-item"><span>{contact.name || `Contact ${contact.originalIndex + 1}`}</span><button onClick={() => restoreContact(contact.originalIndex)}>Restore</button></div>))) : (<p>No contacts have been archived.</p>)}</div></div></div>)}

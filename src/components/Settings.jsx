@@ -2,29 +2,36 @@
 import React from 'react';
 import './Settings.css';
 
-// This component is now much simpler. It just displays the elements.
-// The show/hide logic is all handled by the CSS.
-function Settings({ isDarkMode, setIsDarkMode }) {
-  return (
-    <div className="settings-container">
-      {/* The gear button that is the hover target */}
-      <button className="settings-btn" title="Settings">
-        ⚙️
-      </button>
+function Settings({ isDarkMode, setIsDarkMode, fontSize, setFontSize }) {
 
-      {/* The dropdown menu that will appear on hover */}
-      <div className="settings-dropdown">
-        <label htmlFor="darkModeToggle">
-          Dark Mode
-          <input
-            type="checkbox"
-            id="darkModeToggle"
-            checked={isDarkMode}
-            onChange={() => setIsDarkMode(!isDarkMode)}
-          />
-        </label>
-        {/* You can add more settings here in the future */}
-      </div>
+  const increaseFontSize = () => setFontSize(prev => Math.min(prev + 2, 24)); // Cap at 24px
+  const decreaseFontSize = () => setFontSize(prev => Math.max(prev - 2, 12)); // Floor at 12px
+
+  return (
+    <div className="settings-panel">
+        <div className="settings-flyout-menu">
+            {/* Font Size controls */}
+            <div className="font-size-control">
+                <button onClick={decreaseFontSize} title="Decrease font size">-</button>
+                <span>{fontSize}px</span>
+                <button onClick={increaseFontSize} title="Increase font size">+</button>
+            </div>
+            {/* Dark Mode toggle */}
+            <label htmlFor="darkModeToggle">
+                Dark Mode
+                <input
+                    type="checkbox"
+                    id="darkModeToggle"
+                    checked={isDarkMode}
+                    onChange={() => setIsDarkMode(!isDarkMode)}
+                />
+            </label>
+        </div>
+
+        {/* The main gear button that is always visible */}
+        <button className="settings-btn" title="Settings">
+            ⚙️
+        </button>
     </div>
   );
 }

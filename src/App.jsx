@@ -1,6 +1,6 @@
 // src/App.jsx
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 import Navbar from './components/Navbar';
@@ -10,52 +10,53 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Settings from './components/Settings';
 import Toolbox from './components/Toolbox';
-import AccountDetail from './pages/AccountDetail'; // <-- ADDED: Import the new page component
+import AccountDetail from './pages/AccountDetail';
 
-// This component is the main layout for authenticated users
-function MainAppLayout() {
+// --- A dedicated layout component for authenticated users ---
+function AppLayout() {
     const { logout } = useAuth();
     const [isDarkMode, setIsDarkMode] = useState(false);
+    const [fontSize, setFontSize] = useState(16); // Default font size in pixels
 
-    // Theme-switching logic
     useEffect(() => {
+        // Load Dark Mode
+        const savedMode = localStorage.getItem('darkMode');
+        if (savedMode) { setIsDarkMode(JSON.parse(savedMode)); }
+        else { setIsDarkMode(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches); }
+
+        // Load Font Size
+        const savedFontSize = localStorage.getItem('fontSize');
+        if (savedFontSize) { setFontSize(parseFloat(savedFontSize)); }
+
+    }, []);
+
+    useEffect(() => {
+        // Save Dark Mode
         const body = window.document.body;
         if (isDarkMode) { body.classList.add('dark-mode'); }
         else { body.classList.remove('dark-mode'); }
         localStorage.setItem('darkMode', isDarkMode);
-    }, [isDarkMode]);
 
-    useEffect(() => {
-        const savedMode = localStorage.getItem('darkMode');
-        if (savedMode) { setIsDarkMode(JSON.parse(savedMode)); }
-        else { setIsDarkMode(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches); }
-    }, []);
+        // Save Font Size
+        document.documentElement.style.fontSize = `${fontSize}px`;
+        localStorage.setItem('fontSize', fontSize);
+    }, [isDarkMode, fontSize]);
+
 
     return (
         <>
             <main>
-                <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                {/* --- MODIFIED: Header structure is now simpler and styled with CSS --- */}
+                <header className="app-header">
                     <h1>QUASAR</h1>
-                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                        <button className="logout-btn" onClick={logout}>Logout</button>
-                    </div>
+                    <button className="logout-btn" onClick={logout}>Logout</button>
                 </header>
 
                 <div className="app-layout">
                     <Navbar />
                     <div className="content-layout">
                         <div className="main-content">
-                            <Routes>
-                                <Route path="/" element={<AccountList />} />
-                                {/* --- ADDED: The new route for viewing a single account --- */}
-                                <Route path="/account/:accountId" element={<AccountDetail />} />
-                                <Route path="/admin" element={
-                                    <ProtectedRoute>
-                                        <AdminPanel />
-                                    </ProtectedRoute>
-                                } />
-                                <Route path="*" element={<Navigate to="/" />} />
-                            </Routes>
+                            <Outlet />
                         </div>
                         <div className="sidebar-content">
                             <Toolbox />
@@ -63,37 +64,59 @@ function MainAppLayout() {
                     </div>
                 </div>
             </main>
-            <Settings isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
+            <Settings 
+                isDarkMode={isDarkMode} 
+                setIsDarkMode={setIsDarkMode}
+                fontSize={fontSize}
+                setFontSize={setFontSize}
+            />
         </>
     );
 }
 
-
-// This component handles the top-level routing based on authentication state
-function AppRoutes() {
-    const { currentUser, loading } = useAuth();
-
-    if (loading) {
-        return <div style={{padding: '2rem'}}>Loading...</div>; // Or a proper spinner component
-    }
-
-    return (
-        <Routes>
-            <Route path="/login" element={!currentUser ? <Login /> : <Navigate to="/" />} />
-            <Route path="/*" element={currentUser ? <MainAppLayout /> : <Navigate to="/login" />} />
-        </Routes>
-    );
-}
-
-// The root component sets up all necessary providers and the router
+// --- The main App component handles all routing logic ---
 function App() {
+  const { currentUser, loading } = useAuth();
+
+  if (loading) {
+    return <div style={{padding: '2rem'}}>Loading Application...</div>;
+  }
+
   return (
-    <AuthProvider>
-        <BrowserRouter>
-            <AppRoutes />
-        </BrowserRouter>
-    </AuthProvider>
+    <BrowserRouter>
+        <Routes>
+            {currentUser ? (
+                <Route path="/" element={<AppLayout />}>
+                    <Route index element={<AccountList />} />
+                    <Route path="account/:accountId" element={<AccountDetail />} />
+                    <Route 
+                        path="admin" 
+                        element={
+                            <ProtectedRoute>
+                                <AdminPanel />
+                            </ProtectedRoute>
+                        } 
+                    />
+                    <Route path="*" element={<Navigate to="/" />} />
+                </Route>
+            ) : (
+                <>
+                    <Route path="/login" element={<Login />} />
+                    <Route path="*" element={<Navigate to="/login" />} />
+                </>
+            )}
+        </Routes>
+    </BrowserRouter>
   );
 }
 
-export default App;
+// --- FINAL WRAPPER: The root component just provides the context ---
+function Root() {
+    return (
+        <AuthProvider>
+            <App />
+        </AuthProvider>
+    );
+}
+
+export default Root;

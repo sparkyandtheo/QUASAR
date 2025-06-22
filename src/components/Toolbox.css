@@ -4,6 +4,14 @@
   top: 1rem; /* Sticks to the top as you scroll */
 }
 
+/* --- ADDED: A rule to make sure the h3 scales with font size --- */
+.toolbox-container h3 {
+  font-size: 1.15rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+
 .secondary-tab-nav {
   display: flex;
   border-bottom: 1px solid var(--clr-border);
@@ -20,6 +28,8 @@
   border-radius: 6px 6px 0 0;
   font-weight: 500;
   margin-bottom: -1px;
+  /* --- ADDED: Explicit relative font size for the tabs --- */
+  font-size: 0.9rem;
 }
 
 .secondary-tab-button.active {
@@ -36,21 +46,22 @@
   gap: 1rem;
   max-height: 70vh; /* Set a max height */
   overflow-y: auto; /* Enable vertical scroll */
-  padding-right: 0.5rem; /* Add space for scrollbar */
+  padding: 4px;
 }
 
 .card {
   background: var(--clr-card-bg);
-  padding: 1rem;
+  padding: 0.75rem 1rem;
   border-radius: 8px;
   box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px -1px rgba(0,0,0,0.1);
-  transition: background-color 0.3s;
+  transition: all 0.2s ease-in-out;
   cursor: pointer;
+  margin-right: 2px;
 }
 
 .card:hover {
   border-color: var(--clr-primary);
-  box-shadow: 0 0 0 1px var(--clr-primary);
+  box-shadow: 0 0 0 2px var(--clr-primary); /* Increased outline visibility slightly */
 }
 
 .card-request {
@@ -74,7 +85,6 @@ body.dark-mode .card-request {
   box-sizing: border-box;
 }
 
-/* --- ADDED: Make the link wrapper invisible --- */
 .card-link {
   text-decoration: none;
   color: inherit;
