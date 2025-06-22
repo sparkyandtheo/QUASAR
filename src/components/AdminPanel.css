@@ -24,9 +24,27 @@
     margin-bottom: 1rem;
 }
 
+/* --- ADDED: Styles to make the input box match the main theme --- */
 .zip-input-group input {
     flex-grow: 1;
+    padding: .65rem;
+    border-radius: 6px;
+    border: 1px solid var(--clr-input-border);
+    font: inherit;
+    background-color: var(--clr-card-bg);
+    color: var(--clr-text);
+    transition: border-color 0.2s, box-shadow 0.2s, background-color 0.3s, color 0.3s;
+    height: 41.5px;
+    box-sizing: border-box;
 }
+
+/* --- ADDED: Consistent focus style --- */
+.zip-input-group input:focus {
+    outline: none;
+    border-color: var(--clr-primary);
+    box-shadow: 0 0 0 3px rgba(79, 143, 207, 0.4);
+}
+
 
 .zip-list {
     display: flex;
@@ -36,7 +54,6 @@
     list-style: none;
 }
 
-/* --- MODIFIED: Upgraded the style for the added items to be pill-shaped --- */
 .zip-item {
     background-color: var(--clr-primary);
     color: #fff; /* White text for contrast */
@@ -73,8 +90,6 @@
     opacity: 1;
 }
 
-
-/* --- MODIFIED: Changed to blue outline style --- */
 .zip-input-group button {
   background-color: transparent;
   border: 2px solid var(--clr-primary); /* Use primary blue color */

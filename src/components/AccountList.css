@@ -1,6 +1,6 @@
 /* src/components/AccountList.css */
 
-/* --- ADDED: Styles for the new "Quick Tips" help box --- */
+/* Help Box Styles */
 .help-box {
   background-color: var(--clr-primary);
   color: #fff;
@@ -33,9 +33,8 @@
   font-weight: bold;
   cursor: pointer;
 }
-/* --- End of help box styles --- */
 
-
+/* Main Form Container Styles */
 .account-form-container {
   background-color: var(--clr-card-bg);
   padding: 1.5rem 2rem;
@@ -163,18 +162,19 @@
   margin-right: 0.5rem;
 }
 
+/* Contact Tab Styles */
 .contact-tabs {
   display: flex;
   align-items: center;
-  border-bottom: 1px solid var(--clr-border);
+  border-bottom: 2px solid var(--clr-primary);
   margin-bottom: 1.5rem;
   flex-wrap: wrap; 
 }
 
 .tab-button {
   padding: 0.75rem 1rem;
-  border: none;
-  border-bottom: 1px solid transparent;
+  border: 2px solid transparent;
+  border-bottom: none;
   background: none;
   cursor: pointer;
   color: var(--clr-text);
@@ -183,31 +183,35 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: -1px;
+  position: relative;
+  margin-bottom: -2px;
+  transition: all 0.2s ease-in-out;
 }
 
 .tab-button.active {
-  background: var(--clr-card-bg);
-  border-bottom: 1px solid var(--clr-card-bg);
+  background-color: var(--clr-card-bg);
+  border-color: var(--clr-primary);
+  border-bottom: 2px solid var(--clr-card-bg);
+  border-radius: 6px 6px 0 0;
   color: var(--clr-primary);
-  font-weight: 600;
+  font-weight: 500; 
 }
 
-/* --- MODIFIED: More prominent style for the primary contact's tab --- */
 .tab-button.is-job-contact {
   background-color: var(--clr-page-bg);
   border-radius: 6px 6px 0 0;
-  font-weight: 600;
+  font-weight: 500;
 }
+
 body.dark-mode .tab-button.is-job-contact {
   background-color: #57534e;
 }
+
 .primary-tag {
   color: var(--clr-primary);
   font-weight: bold;
   font-size: 0.8em;
 }
-
 
 .add-contact-btn {
   margin-left: 0.5rem;
@@ -235,25 +239,28 @@ body.dark-mode .tab-button.is-job-contact {
 }
 
 .delete-tab-btn {
-  color: var(--clr-danger);
+  color: var(--clr-text);
+  background-color: var(--clr-border);
   font-weight: bold;
-  padding: 0px 5px;
+  padding: 0;
   border-radius: 50%;
   line-height: 1;
-  transition: background-color 0.2s, color 0.2s;
+  transition: all 0.2s ease-in-out;
   font-size: 1.1rem;
   margin-left: 0.5rem;
-  height: 20px;
-  width: 20px;
+  height: 22px;
+  width: 22px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  vertical-align: middle;
+  opacity: 0.7;
 }
 
 .delete-tab-btn:hover {
   background-color: var(--clr-danger);
   color: white;
+  opacity: 1;
+  transform: scale(1.1);
 }
 
 .job-tag-btn {
@@ -276,40 +283,7 @@ body.dark-mode .tab-button.is-job-contact {
   opacity: 1;
 }
 
-/* --- ADDED: Styles for the final Primary Contact selection area --- */
-.primary-contact-finalizer {
-  border: 1px dashed var(--clr-border);
-  border-radius: 8px;
-  padding: 1rem 1.5rem;
-  margin-top: 2rem;
-  margin-bottom: 2rem;
-}
-.primary-contact-finalizer > label {
-  font-weight: 600;
-  font-size: 1.1rem;
-  display: block;
-  margin-bottom: 1rem;
-}
-.radio-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem 2rem;
-}
-.radio-group > div {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-.radio-group input[type="radio"] {
-  width: 1.15rem;
-  height: 1.15rem;
-}
-.radio-group label {
-  font-weight: 500;
-}
-
-
-/* Styles for Archive Modal */
+/* Modal and History Styles */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -344,500 +318,13 @@ body.dark-mode .tab-button.is-job-contact {
 .modal-header h4 { margin: 0; }
 .modal-header .close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; }
 
-.archived-list {
+.archived-list, .history-section {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
 
-.archived-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: var(--clr-page-bg);
-  padding: 0.75rem;
-  border-radius: 8px;
-}
-
-/* Add these styles to the end of src/components/AccountList.css */
-
-.read-only-field {
-  background-color: var(--clr-page-bg);
-  padding: .65rem;
-  border-radius: 6px;
-  min-height: 41.5px;
-  box-sizing: border-box;
-  line-height: 1.4;
-}
-
-.contact-card {
-  border: 1px solid var(--clr-border);
-  border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-}
-
-.contact-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-
-.job-contact-tag {
-  background-color: var(--clr-primary);
-  color: white;
-  padding: 0.2rem 0.6rem;
-  border-radius: 1rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-/* --- ADDED: Styles for buttons and history section --- */
-.secondary-btn {
-    background: var(--clr-border);
-    color: var(--clr-text);
-}
-.secondary-btn:hover {
-    background: #d6d3d1;
-}
-
-.history-section {
-    margin-top: 2.5rem;
-    border-top: 1px solid var(--clr-border);
-    padding-top: 1.5rem;
-}
-
-.history-section h4 {
-    margin-top: 0;
-    margin-bottom: 1rem;
-}
-
-.history-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: var(--clr-page-bg);
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    margin-bottom: 0.5rem;
-    font-size: 0.9rem;
-}
-
-.history-item-date {
-    font-style: italic;
-    color: #6b7280;
-    font-size: 0.85rem;
-}
-
-body.dark-mode .history-item-date {
-    color: #a1a1aa;
-}
-
-/* Styles from previous steps... */
-
-.read-only-field {
-  background-color: var(--clr-page-bg);
-  padding: .65rem;
-  border-radius: 6px;
-  min-height: 41.5px;
-  box-sizing: border-box;
-  line-height: 1.4;
-}
-
-.contact-card {
-  border: 1px solid var(--clr-border);
-  border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-}
-
-.contact-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-
-.job-contact-tag {
-  background-color: var(--clr-primary);
-  color: white;
-  padding: 0.2rem 0.6rem;
-  border-radius: 1rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.secondary-btn {
-    background: var(--clr-border);
-    color: var(--clr-text);
-}
-.secondary-btn:hover {
-    background: #d6d3d1;
-}
-
-.history-section {
-    margin-top: 2.5rem;
-    border-top: 1px solid var(--clr-border);
-    padding-top: 1.5rem;
-}
-
-.history-section h4 {
-    margin-top: 0;
-    margin-bottom: 1rem;
-}
-
-.history-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: var(--clr-page-bg);
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    margin-bottom: 0.5rem;
-    font-size: 0.9rem;
-}
-
-.history-item-date {
-    font-style: italic;
-    color: #6b7280;
-    font-size: 0.85rem;
-}
-
-body.dark-mode .history-item-date {
-    color: #a1a1aa;
-}
-
-/* --- ADDED: Styles for the new error modal --- */
-.error-modal .modal-header h4 {
-  color: var(--clr-danger);
-}
-
-.error-modal p {
-  margin: 1.5rem 0;
-  line-height: 1.6;
-}
-
-.error-modal .form-actions button {
-    background-color: var(--clr-danger);
-}
-
-/* src/components/AccountList.css */
-
-.help-box {
-  background-color: var(--clr-primary);
-  color: #fff;
-  padding: 1rem 1.5rem;
-  border-radius: 8px;
-  margin-bottom: 2rem;
-  position: relative;
-  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
-}
-.help-box h4 {
-  margin-top: 0;
-  font-size: 1.1rem;
-}
-.help-box ol {
-  padding-left: 1.5rem;
-  margin-bottom: 0;
-}
-.help-box li {
-  margin-bottom: 0.25rem;
-}
-.help-box-dismiss {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.75rem;
-  background: none;
-  border: none;
-  color: #fff;
-  opacity: 0.8;
-  font-size: 1.5rem;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.account-form-container {
-  background-color: var(--clr-card-bg);
-  padding: 1.5rem 2rem;
-  border-radius: 8px;
-  border: 1px solid var(--clr-border);
-  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
-  transition: background-color 0.3s, border-color 0.3s;
-}
-
-.account-form-container fieldset {
-  border: 1px solid var(--clr-border);
-  padding: 1rem 1.5rem;
-  border-radius: 8px;
-}
-
-.account-form-container legend {
-  padding: 0 0.5rem;
-  font-weight: 600;
-  color: var(--clr-primary);
-}
-
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 1.25rem 1.5rem;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  position: relative;
-}
-
-.form-group.full-width {
-  grid-column: 1 / -1;
-}
-
-.form-group label {
-  font-weight: 500;
-  margin-bottom: 0.3rem;
-  font-size: 0.875rem;
-  color: var(--clr-text);
-  display: flex;
-  align-items: center;
-}
-
-.form-group input,
-.form-group textarea,
-.form-group select {
-  padding: .65rem;
-  border-radius: 6px;
-  border: 1px solid var(--clr-input-border);
-  font: inherit;
-  background-color: var(--clr-card-bg);
-  color: var(--clr-text);
-  transition: border-color 0.2s, box-shadow 0.2s, background-color 0.3s, color 0.3s;
-  height: 41.5px;
-  box-sizing: border-box;
-}
-
-.form-group input:focus,
-.form-group textarea:focus,
-.form-group select:focus {
-    outline: none;
-    border-color: var(--clr-primary);
-    box-shadow: 0 0 0 3px rgba(79, 143, 207, 0.4);
-}
-
-.add-street-btn {
-    background: none;
-    border: 1px solid var(--clr-border);
-    border-radius: 50%;
-    color: var(--clr-primary);
-    cursor: pointer;
-    font-weight: bold;
-    width: 20px;
-    height: 20px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: 8px;
-    padding-bottom: 2px;
-}
-
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 1.5rem;
-  grid-column: 1 / -1;
-}
-
-.form-actions button {
-  padding: .65rem 1.25rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  border: none;
-  border-radius: 8px;
-  background: var(--clr-primary);
-  color: #fff;
-  cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
-}
-
-.form-actions button:hover {
-    background: var(--clr-primary-dark);
-}
-
-.grid-col-span-1 { grid-column: span 1; }
-.grid-col-span-2 { grid-column: span 2; }
-.grid-col-span-3 { grid-column: span 3; }
-.grid-col-span-4 { grid-column: span 4; }
-.grid-col-span-6 { grid-column: span 6; }
-
-.checkbox-group {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding-top: 1.25rem;
-  height: 100%;
-}
-
-.checkbox-group input {
-  width: 1.25rem;
-  height: 1.25rem;
-  margin-right: 0.5rem;
-}
-
-.contact-tabs {
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid var(--clr-border);
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap; 
-}
-
-.tab-button {
-  padding: 0.75rem 1rem;
-  border: none;
-  border-bottom: 1px solid transparent;
-  background: none;
-  cursor: pointer;
-  color: var(--clr-text);
-  font-weight: 500;
-  font-size: 0.95rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: -1px;
-}
-
-.tab-button.active {
-  background: var(--clr-card-bg);
-  border-bottom: 1px solid var(--clr-card-bg);
-  color: var(--clr-primary);
-  font-weight: 600;
-}
-
-.tab-button.is-job-contact {
-  background-color: var(--clr-page-bg);
-  border-radius: 6px 6px 0 0;
-  font-weight: 600;
-}
-body.dark-mode .tab-button.is-job-contact {
-  background-color: #57534e;
-}
-.primary-tag {
-  color: var(--clr-primary);
-  font-weight: bold;
-  font-size: 0.8em;
-}
-
-
-.add-contact-btn {
-  margin-left: 0.5rem;
-  padding: 0 0.75rem;
-  font-size: 1.5rem;
-  line-height: 1;
-  background: none;
-  border: none;
-  color: var(--clr-primary);
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.phone-entry {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-  margin-bottom: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.phone-entry .form-group {
-  flex-grow: 1;
-  margin-bottom: 0;
-}
-
-.delete-tab-btn {
-  color: var(--clr-danger);
-  font-weight: bold;
-  padding: 0px 5px;
-  border-radius: 50%;
-  line-height: 1;
-  transition: background-color 0.2s, color 0.2s;
-  font-size: 1.1rem;
-  margin-left: 0.5rem;
-  height: 20px;
-  width: 20px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  vertical-align: middle;
-}
-
-.delete-tab-btn:hover {
-  background-color: var(--clr-danger);
-  color: white;
-}
-
-.job-tag-btn {
-  background-color: var(--clr-border);
-  color: var(--clr-text);
-  opacity: 0.7;
-  padding: 0.25rem 0.75rem;
-  border-radius: 6px;
-  border: 1px solid transparent;
-  font-weight: 600;
-  font-size: 0.8rem;
-  margin-left: 0.5rem;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-}
-
-.job-tag-btn.active {
-  background-color: var(--clr-success);
-  color: #fff;
-  opacity: 1;
-}
-
-/* Styles for Archive Modal */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.6);
-  z-index: 1050;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.modal-content {
-  background: var(--clr-card-bg);
-  padding: 2rem;
-  border-radius: 8px;
-  width: 90%;
-  max-width: 600px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid var(--clr-border);
-  padding-bottom: 1rem;
-  margin-bottom: 1rem;
-}
-
-.modal-header h4 { margin: 0; }
-.modal-header .close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; }
-
-.archived-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.archived-item {
+.archived-item, .history-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -855,92 +342,12 @@ body.dark-mode .tab-button.is-job-contact {
   line-height: 1.4;
 }
 
-.contact-card {
-  border: 1px solid var(--clr-border);
-  border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-}
-
-.contact-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-
-.job-contact-tag {
-  background-color: var(--clr-primary);
-  color: white;
-  padding: 0.2rem 0.6rem;
-  border-radius: 1rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
 .secondary-btn {
     background: var(--clr-border);
     color: var(--clr-text);
 }
 .secondary-btn:hover {
     background: #d6d3d1;
-}
-
-.history-section {
-    margin-top: 2.5rem;
-    border-top: 1px solid var(--clr-border);
-    padding-top: 1.5rem;
-}
-
-.history-section h4 {
-    margin-top: 0;
-    margin-bottom: 1rem;
-}
-
-.history-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: var(--clr-page-bg);
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    margin-bottom: 0.5rem;
-    font-size: 0.9rem;
-}
-
-.history-item-date {
-    font-style: italic;
-    color: #6b7280;
-    font-size: 0.85rem;
-}
-
-body.dark-mode .history-item-date {
-    color: #a1a1aa;
-}
-
-.error-modal {
-    border: 2px solid var(--clr-danger);
-}
-
-.error-modal .modal-header h4 {
-  color: var(--clr-danger);
-  display: flex;
-  align-items: center;
-}
-
-.error-modal .modal-header h4::before {
-    content: '⚠️';
-    margin-right: 0.75rem;
-    font-size: 1.2em;
-}
-
-.error-modal p {
-  margin: 1.5rem 0;
-  line-height: 1.6;
-}
-
-.error-modal .form-actions button {
-    background-color: var(--clr-danger);
 }
 
 .edit-btn {
@@ -959,4 +366,137 @@ body.dark-mode .history-item-date {
   background-color: var(--clr-primary);
   color: #fff;
   box-shadow: 0 4px 12px rgba(79, 143, 207, 0.4);
+}
+
+.contact-card.read-only {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem 1.5rem;
+  padding: 1rem;
+  border-bottom: 1px solid var(--clr-border);
+}
+.contact-card.read-only:last-of-type {
+  border-bottom: none;
+}
+.contact-card.read-only .contact-card-header {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--clr-border);
+}
+.contact-card.read-only .info-group {
+    margin: 0;
+}
+.contact-card.read-only .info-group strong {
+    display: block;
+    margin-bottom: 0.35rem;
+    font-weight: 500;
+    color: var(--clr-text);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    opacity: 0.8;
+}
+.contact-card.read-only .info-group .value {
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+}
+
+.contact-card.edit-mode {
+    border: 1px solid var(--clr-border);
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+/* Validation Styles */
+input.pristine:focus,
+select.pristine:focus {
+    border-color: var(--clr-primary);
+    box-shadow: 0 0 0 3px rgba(79, 143, 207, 0.4);
+}
+input.invalid {
+    border-color: var(--clr-danger);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.4);
+}
+input.valid {
+    border-color: var(--clr-success);
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.4);
+}
+
+.zip-validation-message {
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: color 0.3s;
+  opacity: 0;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  padding-top: 0.2rem;
+  white-space: nowrap;
+}
+.zip-validation-message:not(.pristine) {
+  opacity: 1;
+}
+.zip-validation-message.standard {
+  color: var(--clr-success);
+}
+.zip-validation-message.travel {
+  color: #f59e0b;
+}
+.zip-validation-message.out-of-area {
+  color: var(--clr-danger);
+}
+.checkbox-group.warning label {
+  color: var(--clr-danger);
+  font-weight: 500;
+}
+
+/* Error Modal Styles */
+.error-modal {
+    border: 2px solid var(--clr-danger);
+}
+.error-modal .modal-header h4 {
+  color: var(--clr-danger);
+  display: flex;
+  align-items: center;
+}
+.error-modal .modal-header h4::before {
+    content: '⚠️';
+    margin-right: 0.75rem;
+    font-size: 1.2em;
+}
+.error-modal p {
+  margin: 1.5rem 0;
+  line-height: 1.6;
+}
+.error-modal .form-actions button {
+    background-color: var(--clr-danger);
+}
+
+.add-phone-btn {
+    background: var(--clr-page-bg);
+    border: 1px dashed var(--clr-border);
+    color: var(--clr-primary);
+    width: 100%;
+    padding: 0.5rem;
+    border-radius: 6px;
+    margin-top: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.history-btn {
+    margin-left: auto; /* Pushes the button to the right */
+    background: none;
+    border: none;
+    color: var(--clr-primary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0.25rem;
+}
+.history-btn:hover {
+    text-decoration: underline;
 }
