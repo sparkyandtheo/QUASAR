@@ -5,8 +5,9 @@ import { db } from '../firebaseConfig';
 import './AccountList.css';
 
 const usStates = ['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY'];
-const defaultPhone = { type: 'Mobile', number: '', smsOk: false };
-const defaultContact = { name: '', email: '', isJobContact: false, isArchived: false, phones: [{ ...defaultPhone }] };
+// --- MODIFIED: Added validation status to default state ---
+const defaultPhone = { type: 'Mobile', number: '', smsOk: false, numberStatus: 'pristine' };
+const defaultContact = { name: '', email: '', emailStatus: 'pristine', isJobContact: false, isArchived: false, phones: [{ ...defaultPhone }] };
 
 function AccountList() {
   const [contacts, setContacts] = useState([{...defaultContact, isJobContact: true}]);
@@ -24,11 +25,22 @@ function AccountList() {
   const [showStreet2, setShowStreet2] = useState(false);
   const [isJobsiteSameAsBilling, setIsJobsiteSameAsBilling] = useState(false);
 
+  // --- ADDED: Validation Functions ---
+  const validateEmail = (email) => {
+    if (email.trim() === '') return 'pristine';
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email) ? 'valid' : 'invalid';
+  };
+
+  const validatePhone = (phone) => {
+    if (phone.trim() === '') return 'pristine';
+    const phoneRegex = /^\(\d{3}\) \d{3}-\d{4}$/;
+    return phoneRegex.test(phone) ? 'valid' : 'invalid';
+  };
+
   useEffect(() => {
     const helpDismissed = localStorage.getItem('quasarHelpDismissed');
-    if (!helpDismissed) {
-      setShowHelp(true);
-    }
+    if (!helpDismissed) { setShowHelp(true); }
   }, []);
 
   useEffect(() => {
@@ -39,9 +51,7 @@ function AccountList() {
             if (docSnap.exists()) {
                 setCustomerSourcesList(docSnap.data().customerSources || []);
             }
-          } catch (error) {
-              console.error("Error fetching customer sources:", error);
-          }
+          } catch (error) { console.error("Error fetching customer sources:", error); }
       };
       fetchSources();
   }, []);
@@ -56,32 +66,42 @@ function AccountList() {
     if (!value) return value;
     const phoneNumber = value.replace(/[^\d]/g, '');
     const phoneNumberLength = phoneNumber.length;
-    if (phoneNumberLength < 4) return phoneNumber;
+    if (phoneNumberLength < 4) return `(${phoneNumber}`;
     if (phoneNumberLength < 7) return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3)}`;
     return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
   };
+  
   const handleContactChange = (index, field, value) => {
     const newContacts = [...contacts];
     newContacts[index][field] = value;
+    // --- ADDED: Validate email on change ---
+    if (field === 'email') {
+        newContacts[index].emailStatus = validateEmail(value);
+    }
     setContacts(newContacts);
   };
 
   const handleJobContactToggle = (toggledIndex) => {
-    const newContacts = contacts.map((contact, index) => ({
-      ...contact,
-      isJobContact: index === toggledIndex
-    }));
+    const newContacts = contacts.map((contact, index) => ({ ...contact, isJobContact: index === toggledIndex }));
     setContacts(newContacts);
   };
 
   const handlePhoneChange = (contactIndex, phoneIndex, field, event) => {
     const newContacts = [...contacts];
     const phone = newContacts[contactIndex].phones[phoneIndex];
-    if (field === 'smsOk') phone.smsOk = event.target.checked;
-    else if (field === 'number') phone.number = formatPhoneNumber(event.target.value);
-    else phone[field] = event.target.value;
+    if (field === 'smsOk') {
+        phone.smsOk = event.target.checked;
+    } else if (field === 'number') {
+        const formattedNumber = formatPhoneNumber(event.target.value);
+        phone.number = formattedNumber;
+        // --- ADDED: Validate phone on change ---
+        phone.numberStatus = validatePhone(formattedNumber);
+    } else {
+        phone[field] = event.target.value;
+    }
     setContacts(newContacts);
   };
+  
   const addContact = () => {
     const newContact = {...defaultContact, isJobContact: contacts.every(c => !c.isJobContact)};
     setContacts([...contacts, newContact]);
@@ -97,9 +117,7 @@ function AccountList() {
     newContacts[indexToArchive].isArchived = true;
     if (newContacts[indexToArchive].isJobContact) {
         const firstActiveIndex = newContacts.findIndex(c => !c.isArchived);
-        if (firstActiveIndex !== -1) {
-            newContacts[firstActiveIndex].isJobContact = true;
-        }
+        if (firstActiveIndex !== -1) { newContacts[firstActiveIndex].isJobContact = true; }
     }
     setContacts(newContacts);
     const firstActiveIndex = newContacts.findIndex(c => !c.isArchived);
@@ -144,6 +162,7 @@ function AccountList() {
 
   return (
     <>
+      <h2>Accounts</h2>
       <div className="account-form-container">
         {showHelp && (
           <div className="help-box">
@@ -160,11 +179,11 @@ function AccountList() {
         <fieldset>
           <legend>Create New Account</legend>
           <div className="form-group" style={{marginBottom: '1.5rem'}}>
-              <label htmlFor="customerSource">Customer Source</label>
-              <select id="customerSource" value={customerSource} onChange={e => setCustomerSource(e.target.value)}>
-                  <option value="">Select a source...</option>
-                  {customerSourcesList.map(source => <option key={source} value={source}>{source}</option>)}
-              </select>
+            <label htmlFor="customerSource">Customer Source</label>
+            <select id="customerSource" value={customerSource} onChange={e => setCustomerSource(e.target.value)}>
+                <option value="">Select a source...</option>
+                {customerSourcesList.map(source => <option key={source} value={source}>{source}</option>)}
+            </select>
           </div>
           <div className="contact-tabs">
             {visibleContacts.map((contact) => (
@@ -188,10 +207,22 @@ function AccountList() {
           </div>
           <div className="form-grid">
               <div className="form-group grid-col-span-3"><label htmlFor="contactName">Contact Name</label><input id="contactName" type="text" value={activeContact.name || ''} onChange={(e) => handleContactChange(activeContactIndex, 'name', capitalizeWords(e.target.value))} /></div>
-              <div className="form-group grid-col-span-3"><label htmlFor="contactEmail">Email</label><input id="contactEmail" type="email" value={activeContact.email || ''} onChange={(e) => handleContactChange(activeContactIndex, 'email', e.target.value)} /></div>
+              {/* --- MODIFIED: Added dynamic className for validation --- */}
+              <div className="form-group grid-col-span-3"><label htmlFor="contactEmail">Email</label><input id="contactEmail" type="email" value={activeContact.email || ''} onChange={(e) => handleContactChange(activeContactIndex, 'email', e.target.value)} className={activeContact.emailStatus} /></div>
               <div className="form-group grid-col-span-6">
                    <label>Phone Numbers <button className="add-street-btn" title="Add phone number" onClick={() => addPhoneNumber(activeContactIndex)}>+</button></label>
-                   {activeContact.phones?.map((phone, index) => (<div key={index} className="phone-entry"><input list="phone-types" placeholder="Type" value={phone.type} onChange={(e) => handlePhoneChange(activeContactIndex, index, 'type', e)} style={{flexBasis: '120px', flexGrow: 0}}/><div className="form-group" style={{flexBasis: '180px', flexGrow: 0}}><input type="tel" placeholder="(XXX) XXX-XXXX" value={phone.number} onChange={(e) => handlePhoneChange(activeContactIndex, index, 'number', e)} /></div><div className="checkbox-group" style={{paddingTop: 0}}><input id={`smsOk-${index}`} type="checkbox" checked={phone.smsOk} onChange={(e) => handlePhoneChange(activeContactIndex, index, 'smsOk', e)} /><label htmlFor={`smsOk-${index}`}>SMS OK?</label></div></div>))}
+                   {activeContact.phones?.map((phone, index) => (
+                    <div key={index} className="phone-entry">
+                        <input list="phone-types" placeholder="Type" value={phone.type} onChange={(e) => handlePhoneChange(activeContactIndex, index, 'type', e)} style={{flexBasis: '120px', flexGrow: 0}}/>
+                        <div className="form-group" style={{flexBasis: '180px', flexGrow: 0}}>
+                            {/* --- MODIFIED: Added dynamic className for validation --- */}
+                            <input type="tel" placeholder="(XXX) XXX-XXXX" value={phone.number} onChange={(e) => handlePhoneChange(activeContactIndex, index, 'number', e)} className={phone.numberStatus} />
+                        </div>
+                        <div className="checkbox-group" style={{paddingTop: 0}}>
+                            <input id={`smsOk-${index}`} type="checkbox" checked={phone.smsOk} onChange={(e) => handlePhoneChange(activeContactIndex, index, 'smsOk', e)} />
+                            <label htmlFor={`smsOk-${index}`}>SMS OK?</label>
+                        </div>
+                    </div>))}
               </div>
               <datalist id="phone-types">
                   <option value="Mobile" />
@@ -201,7 +232,6 @@ function AccountList() {
                   <option value="Spouse" />
                   <option value="Fax" />
               </datalist>
-              {/* --- MOVED: Default Job Contact checkbox is now here --- */}
               <div className="form-group grid-col-span-6">
                 <div className="checkbox-group" style={{paddingTop: '0.5rem', justifyContent: 'flex-start'}}>
                     <input id="isJobContact" type="checkbox" checked={activeContact.isJobContact} onChange={() => handleJobContactToggle(activeContactIndex)} />
@@ -222,7 +252,28 @@ function AccountList() {
           <div className="form-actions grid-col-span-6"><button type="button" onClick={handleCreateAccount}>Create Account</button></div>
         </fieldset>
       </div>
-      {showArchiveModal && (<div className="modal-overlay"><div className="modal-content"><div className="modal-header"><h4>Archived Contacts</h4><button className="close-btn" onClick={() => setShowArchiveModal(false)}>×</button></div><div className="archived-list">{archivedContacts.length > 0 ? (archivedContacts.map((contact) => (<div key={contact.originalIndex} className="archived-item"><span>{contact.name || `Contact ${contact.originalIndex + 1}`}</span><button onClick={() => restoreContact(contact.originalIndex)}>Restore</button></div>))) : (<p>No contacts have been archived.</p>)}</div></div></div>)}
+      {showArchiveModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h4>Archived Contacts</h4>
+              <button className="close-btn" onClick={() => setShowArchiveModal(false)}>×</button>
+            </div>
+            <div className="archived-list">
+              {archivedContacts.length > 0 ? (
+                archivedContacts.map((contact) => (
+                  <div key={contact.originalIndex} className="archived-item">
+                    <span>{contact.name || `Contact ${contact.originalIndex + 1}`}</span>
+                    <button onClick={() => restoreContact(contact.originalIndex)}>Restore</button>
+                  </div>
+                ))
+              ) : (
+                <p>No contacts have been archived.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
